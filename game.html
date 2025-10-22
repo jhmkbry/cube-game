@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Box Game</title>
+  <style>
+    /* ===== BASIC PAGE STYLING ===== */
+    body {
+      margin: 0;
+      background: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: sans-serif;
+      color: white;
+    }
+
+    /* ===== GAME AREA ===== */
+    #game {
+      position: relative;
+      width: 600px;
+      height: 400px;
+      background: #333;
+      border: 2px solid white;
+      overflow: hidden;
+    }
+
+    /* ===== PLAYER BOX ===== */
+    .box {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: dodgerblue;
+      top: 180px;
+      left: 280px;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    /* ===== TARGET CIRCLE ===== */
+    .circle {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: red;
+    }
+  </style>
+</head>
+<body>
+
+    <h1 style="position: absolute; top: 10px;">Box Game (Use WASD or Arrow Keys to Move)</h1>
+  <div id="game">
+    <div class="box" id="box"></div>
+    <div class="circle" id="circle"></div>
+  </div>
+
+    <!-- Background Music -->
+
+  <audio id="bgMusic" src="retro.mp3" loop autoplay></audio>
+
+  <script>
+    /* ===============================
+       SIMPLE BOX COLLECTOR GAME LOGIC
+       =============================== */
+
+    // Get HTML elements
+    const game = document.getElementById('game');
+    const box = document.getElementById('box');
+    const circle = document.getElementById('circle');
+
+    // Game area dimensions
+    const gameWidth = game.clientWidth;
+    const gameHeight = game.clientHeight;
+
+    // Player and circle data
+    let boxX = 280, boxY = 180;
+    const speed = 5; // movement speed
+
+    // Randomly place circle initially
+    placeCircle();
+
+    // Listen for key presses (WASD or Arrow keys)
+    document.addEventListener('keydown', (e) => {
+      switch(e.key) {
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          boxY -= speed;
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          boxY += speed;
+          break;
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          boxX -= speed;
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          boxX += speed;
+          break;
+      }
+
+      // Prevent player from going outside the box
+      boxX = Math.max(0, Math.min(gameWidth - box.clientWidth, boxX));
+      boxY = Math.max(0, Math.min(gameHeight - box.clientHeight, boxY));
+
+      // Update player position
+      box.style.left = boxX + 'px';
+      box.style.top = boxY + 'px';
+
+      // Check collision
+      checkCollision();
+    });
+
+    // ===== Randomly place circle inside game area =====
+    function placeCircle() {
+      const x = Math.random() * (gameWidth - circle.clientWidth);
+      const y = Math.random() * (gameHeight - circle.clientHeight);
+      circle.style.left = x + 'px';
+      circle.style.top = y + 'px';
+      circle.style.background = randomColor();
+    }
+
+    // ===== Generate random color =====
+    function randomColor() {
+      const colors = ['red', 'yellow', 'green', 'blue', 'orange', 'purple', 'pink', 'cyan'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    // ===== Check collision between box and circle =====
+    function checkCollision() {
+      const boxRect = box.getBoundingClientRect();
+      const circleRect = circle.getBoundingClientRect();
+
+      // Using bounding box overlap check
+      if (
+        boxRect.left < circleRect.right &&
+        boxRect.right > circleRect.left &&
+        boxRect.top < circleRect.bottom &&
+        boxRect.bottom > circleRect.top
+      ) {
+        // Collision detected
+        box.style.background = circle.style.background; // change box color
+        placeCircle(); // spawn new circle
+        
+      }
+    }
+
+    // ===== Background Music Control =====
+    document.body.addEventListener('click', () => {
+      bgMusic.play().catch(() => {});
+    }, { once: true });
+
+  </script>
+</body>
+</html>
